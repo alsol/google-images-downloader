@@ -7,6 +7,7 @@ import argparse
 import os
 import json
 import ssl
+import imghdr
 
 download_path = "./result"
 
@@ -31,10 +32,16 @@ def download_image(image_url, image_type, image_prefix, image_postfix):
     raw_img = request.urlopen(request.Request(image_url, headers, method='GET'), context=ssl_context).read()
 
     image_file_name = image_prefix + "_" + str(image_postfix) + "." + image_type
-    with open(download_path + "/" + image_prefix + "/" + image_file_name, 'wb') as f:
+    image_path = download_path + "/" + image_prefix + "/" + image_file_name
+
+    with open(image_path, 'wb') as f:
         f.write(raw_img)
 
     print("Downloaded: " + image_file_name)
+
+    if not imghdr.what(image_path):
+        os.remove(image_path)
+        raise IOError("Image validation failed")
 
 
 def main(search_query, limit=50):
